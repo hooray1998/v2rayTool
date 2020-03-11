@@ -13,14 +13,9 @@ from template import conf_template
 
 class Sub2Conf():
     def __init__(self):
-        with open("/usr/share/v2rayTool/sub.json", "r") as f:
+        with open("./sub.json", "r") as f:
             self.subs_url = json.load(f)
 
-        # 解析后配置
-        # try:
-            # with open("/usr/share/v2rayTool/conf.json", "r") as f:
-            # self.conf = json.load(f)
-        # except:
         self.conf = {}
 
         '''
@@ -56,7 +51,7 @@ class Sub2Conf():
                 print("暂不支持", ori[0], "其他协议")
 
         # 保存到conf.json, 有中文
-        with open('/usr/share/v2rayTool/conf.json', 'w', encoding='utf-8') as f:
+        with open('./conf.json', 'w', encoding='utf-8') as f:
             json.dump(self.conf, f, ensure_ascii=False, indent=4)
 
     def setconf(self, region, http, socks):
@@ -154,7 +149,7 @@ class Sub2Conf():
                 } if use_conf["type"] != "none" else {}
             }
 
-        with open('/usr/share/v2rayTool/config.json', 'w') as f:
+        with open('./config.json', 'w') as f:
             f.write(json.dumps(conf, indent=4))
 
 
