@@ -10,21 +10,18 @@ import json
 import os
 from template import conf_template
 
-class Sub2Conf(object):
+
+class Sub2Conf():
     def __init__(self):
-        try:
-            with open("/usr/share/v2rayTool/sub.json", "r") as f:
-                self.subs_url = json.load(f)
-        except:
-            raise Exception("[sub.json]: 无订阅或订阅无效")
+        with open("/usr/share/v2rayTool/sub.json", "r") as f:
+            self.subs_url = json.load(f)
 
         # 解析后配置
         # try:
             # with open("/usr/share/v2rayTool/conf.json", "r") as f:
-                # self.conf = json.load(f)
+            # self.conf = json.load(f)
         # except:
         self.conf = {}
-
 
         '''
         self.conf结构
@@ -36,16 +33,14 @@ class Sub2Conf(object):
 
     def update(self):
         all_subs = []
-        for name,url in self.subs_url.items():
-            try:
-                ret = requests.get(url, timeout=30, headers={'user-agent': 'hooray1998'})
-                if ret.status_code != 200:
-                    print("无法获取订阅({})的信息，订阅站点{}访问失败".format(name, url))
-                subs = base64.b64decode(ret.text + "==").decode().strip()
-                all_subs.extend(subs.split("\n"))
-                print("订阅{} 服务器数量{}".format(name,len(subs.split("\n"))))
-            except:
-                raise Exception("无法获取订阅({})的信息，订阅站点{}访问失败".format(name, url))
+        for name, url in self.subs_url.items():
+            ret = requests.get(url, timeout=30, headers={
+                               'user-agent': 'hooray1998'})
+            if ret.status_code != 200:
+                print("无法获取订阅({})的信息，订阅站点{}访问失败".format(name, url))
+            subs = base64.b64decode(ret.text + "==").decode().strip()
+            all_subs.extend(subs.split("\n"))
+            print("订阅{} 服务器数量{}".format(name, len(subs.split("\n"))))
 
         origin = []
         for sub in all_subs:
@@ -53,16 +48,16 @@ class Sub2Conf(object):
 
         for ori in origin:
             if ori[0] == "vmess":
-                ret = json.loads(parse.unquote(base64.b64decode(ori[1]+"==").decode()).replace("\'", "\""))
+                ret = json.loads(parse.unquote(base64.b64decode(
+                    ori[1]+"==").decode()).replace("\'", "\""))
                 region = ret['ps']
                 self.conf[region] = ret
-                # print("服务器:",region)
             else:
-                print("暂不支持",ori[0],"其他协议")
+                print("暂不支持", ori[0], "其他协议")
 
         # 保存到conf.json, 有中文
-        with open('/usr/share/v2rayTool/conf.json','w',encoding='utf-8') as f:
-            json.dump(self.conf,f,ensure_ascii=False,indent=4)
+        with open('/usr/share/v2rayTool/conf.json', 'w', encoding='utf-8') as f:
+            json.dump(self.conf, f, ensure_ascii=False, indent=4)
 
     def setconf(self, region, http, socks):
         """
@@ -159,16 +154,14 @@ class Sub2Conf(object):
                 } if use_conf["type"] != "none" else {}
             }
 
-        with open('/usr/share/v2rayTool/config.json','w') as f:
+        with open('/usr/share/v2rayTool/config.json', 'w') as f:
             f.write(json.dumps(conf, indent=4))
 
 
 if __name__ == "__main__":
 
-    # parser = argparse.ArgumentParser(description="v2ray 工具")
-    # parser.add_argument("update",nargs='?', help="更新订阅",default=False)
-    # args = parser.parse_args()
-
+    os.environ["http_proxy"] = ""
+    os.environ["https_proxy"] = ""
     os.environ["all_proxy"] = ""
     s = Sub2Conf()
 
@@ -176,28 +169,30 @@ if __name__ == "__main__":
     s.update()
     all_server = list(s.conf.keys())
     size = len(all_server)
-    for index,name in enumerate(all_server):
+    for index, name in enumerate(all_server):
         print(index+1, name)
     print('other-key >>>退出<<<')
-    select = input("\n选择服务器 输入[1-%d]\n"%size)
-    if select not in [ str(i) for i in range(1,size)]:
+    select = input("\n选择服务器 输入[1-%d]\n" % size)
+    if select not in [str(i) for i in range(1, size)]:
         print("exit 0")
         exit(0)
     select_server = all_server[int(select)-1]
-    print('select:',select_server)
+    print('select:', select_server)
     # print('conf:',s.conf[select_server])
 
-    s.setconf(select_server,10809,1080)
+    s.setconf(select_server, 10809, 1080)
     output = subprocess.getoutput(["sudo systemctl status v2ray.service"])
     if "Active: active" in output:
-        reCode = subprocess.call(["sudo systemctl restart v2ray.service"], shell=True)
+        reCode = subprocess.call(
+            ["sudo systemctl restart v2ray.service"], shell=True)
         print(subprocess.getoutput(["sudo systemctl status v2ray.service"]))
         if reCode != 0:
             print("重启v2ray失败")
         else:
             print("重启v2ray成功")
     else:
-        reCode = subprocess.call(["sudo systemctl start v2ray.service"], shell=True)
+        reCode = subprocess.call(
+            ["sudo systemctl start v2ray.service"], shell=True)
         print(subprocess.getoutput(["sudo systemctl status v2ray.service"]))
         if reCode != 0:
             print("启动v2ray失败")
