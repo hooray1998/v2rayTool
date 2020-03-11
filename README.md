@@ -6,7 +6,6 @@
 
 ## 二、配置
 
-
 ### 添加订阅
 
 编辑`sub.json`即可
@@ -25,4 +24,3 @@ sudo ln -s /home/itt/v2rayTool/config.json /etc/v2ray/config.json
 ## 三、使用
 
 `python v2rayTool.py`更新订阅并选择服务器
-
